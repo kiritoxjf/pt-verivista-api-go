@@ -1,0 +1,17 @@
+{
+  "db": {
+    "driver": "",
+    "ip_addr": "",
+    "port": "",
+    "user": "",
+    "pass": "",
+    "name": ""
+  },
+  "mail": {
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "user": "",
+    "pwd": "",
+    "nick": ""
+  }
+}
