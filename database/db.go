@@ -13,7 +13,7 @@ var DBClient *sql.DB
 // InitDB 创建数据库连接
 func InitDB(DB interfaces.DB) error {
 
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", DB.User, DB.Pass, DB.IP, DB.Port, DB.Name)
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", DB.User, DB.Pass, DB.IP, DB.Port, DB.Name)
 
 	var err error
 	DBClient, err = sql.Open(DB.Driver, dataSource)
