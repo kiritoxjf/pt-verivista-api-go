@@ -7,6 +7,7 @@ import (
 	"verivista/pt/database"
 	"verivista/pt/handlers"
 	"verivista/pt/logger"
+	"verivista/pt/modules"
 )
 
 func main() {
@@ -36,6 +37,8 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/api/icp", handlers.ICPHandler)
+	r.GET("/api/black", handlers.CheckBlackHandler)
+	r.GET("/api/lastTime", modules.GetLastTime)
 
 	go func() {
 		if err := r.Run(":8081"); err != nil {

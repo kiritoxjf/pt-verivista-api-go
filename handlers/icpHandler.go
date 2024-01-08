@@ -4,11 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 	"verivista/pt/database"
 	"verivista/pt/interfaces"
 )
 
 func ICPHandler(c *gin.Context) {
+	//header := c.Request.Header.Get("X-Real-Ip")
 	DB := database.DBClient
 
 	type ICP struct {
@@ -23,5 +25,8 @@ func ICPHandler(c *gin.Context) {
 		})
 		return
 	}
+	// 设置浏览器缓存策略 1小时
+	c.Header("Cache-Control", "public, max-age=3600")
+	c.Header("Last-Modified", time.Now().Format(http.TimeFormat))
 	c.JSON(http.StatusOK, icp)
 }
