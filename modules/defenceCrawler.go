@@ -19,7 +19,7 @@ func CheckCrawler(ip string) (int, time.Time) {
 		frequency int
 	)
 	now := time.Now()
-	fiveMinutes := 5 * time.Minute
+	fiveMinutes := 1 * time.Minute
 
 	// 第一次请求，初始化反爬记录
 	if err := DB.QueryRow("SELECT last_time, frequency FROM t_ip WHERE ip = ?", ip).Scan(&lastTime, &frequency); err != nil {

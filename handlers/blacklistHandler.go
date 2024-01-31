@@ -44,8 +44,12 @@ func CheckBlackHandler(c *gin.Context) {
 	if err := DB.QueryRow("SELECT email, reporter, description, DATE(date) FROM t_blacklist WHERE email = ?", email).Scan(&black.Email, &black.Reporter, &black.Description, &black.Date); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusOK, gin.H{
-				"black": false,
+				"black":    false,
+				"lastTime": time.Now(),
 			})
+			if err := modules.ResetCrawler(c.Request.Header.Get("X-Real-IP")); err != nil {
+				logrus.Errorln(err)
+			}
 			return
 		} else {
 			logrus.Errorln("[获取查人结果失败]：", err)

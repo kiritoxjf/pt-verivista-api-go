@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>VeriVista PT</title>
+    </head>
+    <body>
+        <h1>Verivista PT提示</h1>
+        <p style="font-size: 20px">尊敬的<b>{{.Username}}</b>用户，您好</p>
+        <p>您的验证码是 <b class="code">{{.AuthCode}}</b> </p>
+        <p>有效期5分钟</p>
+        <p>如果该验证码不为您本人申请，请无视。</p>
+    </body>
+    <style>
+        h1 {
+            display: inline-block;
+            padding: 0 10px;
+        }
+        .code {
+            display: inline-block;
+            padding: 5px 10px;
+        }
+    </style>
+</html>

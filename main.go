@@ -7,6 +7,7 @@ import (
 	"verivista/pt/database"
 	"verivista/pt/handlers"
 	"verivista/pt/logger"
+	"verivista/pt/mail"
 	"verivista/pt/modules"
 )
 
@@ -32,13 +33,23 @@ func main() {
 	}
 	logrus.Infoln("数据库初始化成功")
 
+	mail.ConnMailClient()
+
 	// 创建一个Gin路由器
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	r.GET("/api/icp", handlers.ICPHandler)
-	r.GET("/api/black", handlers.CheckBlackHandler)
-	r.GET("/api/lastTime", modules.GetLastTime)
+	// 公用接口
+	commonGroup := r.Group("/api/com/")
+	commonGroup.GET("/icp", handlers.ICPHandler)
+	commonGroup.GET("/black", handlers.CheckBlackHandler)
+	commonGroup.GET("/lastTime", modules.GetLastTime)
+	commonGroup.POST("/signCode", handlers.SignCodeHandler)
+	commonGroup.POST("/signOn", handlers.SignOnHandler)
+
+	// 私密接口
+	authGroup := r.Group("/api/auth/")
+	authGroup.Use(modules.AuthMiddleware())
 
 	go func() {
 		if err := r.Run(":8081"); err != nil {
