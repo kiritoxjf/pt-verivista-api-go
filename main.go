@@ -46,10 +46,12 @@ func main() {
 	commonGroup.GET("/lastTime", modules.GetLastTime)
 	commonGroup.POST("/signCode", handlers.SignCodeHandler)
 	commonGroup.POST("/signOn", handlers.SignOnHandler)
+	commonGroup.POST("/signIn", handlers.SignInHandler)
 
 	// 私密接口
 	authGroup := r.Group("/api/auth/")
 	authGroup.Use(modules.AuthMiddleware())
+	authGroup.GET("/authInfo", handlers.AuthInfoHandler)
 
 	go func() {
 		if err := r.Run(":8081"); err != nil {

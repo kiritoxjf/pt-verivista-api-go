@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 	"verivista/pt/database"
@@ -32,9 +31,9 @@ func SignOnHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "获取必要参数失败",
 		})
+		return
 	}
 
-	// 反爬
 	realIp := c.Request.Header.Get("X-Real-IP")
 
 	var codeTime time.Time
@@ -70,29 +69,22 @@ func SignOnHandler(c *gin.Context) {
 		return
 	}
 
-	var userId int
-	err = DB.QueryRow("SELECT id FROM t_user WHERE email = ?", jsonData.Email).Scan(&userId)
+	// 生成cookie
+	cookie, err := modules.CookieCreate(jsonData.Email)
 	if err != nil {
-		logrus.Errorln("[注册的用户未查询到]:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "注册的用户未查询到，请联系管理员排查",
-		})
-		return
-	}
-	now := time.Now()
-
-	// 生成Cookie Token
-	cookie := modules.Sha256Hash(strconv.Itoa(userId) + "_" + jsonData.Email + "_" + now.String())
-	_, err = DB.Exec("INSERT INTO t_cookie (token, time, user) VALUES (?,?,?)", cookie, time.Now(), userId)
-	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "帐号注册失败, 请联系管理大大",
+			})
+		}
 		logrus.Errorln("[生成Cookie失败]:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "生成Cookie失败，请联系管理员排查",
+			"message": "生成Cookie失败, 请联系管理大大",
 		})
 		return
 	}
 
-	c.SetCookie("verivista_token", cookie, 432000, "/", "", false, true)
+	c.SetCookie("verivista_token", cookie, 432000, "/", "", false, false)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "注册成功",
@@ -101,7 +93,91 @@ func SignOnHandler(c *gin.Context) {
 
 // SignInHandler 登陆
 func SignInHandler(c *gin.Context) {
+	type JsonData struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
+	realIp := c.Request.Header.Get("X-Real-IP")
+
+	DB := database.DBClient
+	var jsonData JsonData
+	d, _ := c.GetRawData()
+	if err := json.Unmarshal(d, &jsonData); err != nil {
+		logrus.Errorln("[参数传递失败]:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "获取必要参数失败",
+		})
+		return
+	}
+
+	// 验证账号密码
+	var password string
+	if err := DB.QueryRow("SELECT password FROM t_user WHERE email = ?", jsonData.Email).Scan(&password); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "这个邮箱没有注册呢~",
+			})
+			return
+		}
+		logrus.Errorln("[获取密码失败]：", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "服务器逻辑出错，请联系管理员大大",
+		})
+		return
+	}
+
+	if password != modules.Sha256Hash(jsonData.Password) {
+		c.JSON(http.StatusConflict, gin.H{
+			"message": "密码错误",
+		})
+		return
+	}
+
+	// 更新登录记录
+	if _, err := DB.Exec("UPDATE t_user SET ip = ?, time = ? WHERE email = ?", realIp, time.Now(), jsonData.Email); err != nil {
+		logrus.Errorln("[更新登录记录失败]：", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "服务器逻辑出错，请联系管理员大大",
+		})
+		return
+	}
+
+	// 生成cookie
+	cookie, err := modules.CookieCreate(jsonData.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "帐号未注册",
+			})
+		}
+		logrus.Errorln("[生成Cookie失败]:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "生成Cookie失败, 请联系管理大大",
+		})
+		return
+	}
+
+	c.SetCookie("verivista_token", cookie, 432000, "/", "", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "登录成功",
+	})
+}
+
+// AuthInfoHandler 验证Cookie获取用户信息
+func AuthInfoHandler(c *gin.Context) {
+	DB := database.DBClient
+	userId := c.MustGet("userId").(int)
+
+	type UserInfo struct {
+		ID       int    `json:"id"`
+		Username string `json:"name"`
+		Email    string `json:"email"`
+	}
+	var userInfo UserInfo
+	_ = DB.QueryRow("SELECT id, username, email FROM t_user WHERE id = ?", userId).Scan(&userInfo.ID, &userInfo.Username, &userInfo.Email)
+
+	c.JSON(http.StatusOK, userInfo)
 }
 
 func UserHandler(c *gin.Context) {
