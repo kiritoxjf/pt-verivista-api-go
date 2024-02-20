@@ -41,9 +41,10 @@ func main() {
 
 	// 公用接口
 	commonGroup := r.Group("/api/com/")
+	commonGroup.POST("/record", handlers.IpRecordHandler)
 	commonGroup.GET("/icp", handlers.ICPHandler)
 	commonGroup.GET("/black", handlers.CheckBlackHandler)
-	commonGroup.GET("/lastTime", modules.GetLastTime)
+	commonGroup.GET("/defense", modules.GetDefense)
 	commonGroup.POST("/signCode", handlers.SignCodeHandler)
 	commonGroup.POST("/signOn", handlers.SignOnHandler)
 	commonGroup.POST("/signIn", handlers.SignInHandler)

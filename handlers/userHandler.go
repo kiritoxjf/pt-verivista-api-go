@@ -34,7 +34,12 @@ func SignOnHandler(c *gin.Context) {
 		return
 	}
 
+	// 防御
 	realIp := c.Request.Header.Get("X-Real-IP")
+
+	if crawler := modules.CheckCrawler(c, realIp, "search"); !crawler {
+		return
+	}
 
 	var codeTime time.Time
 	err = DB.QueryRow("SELECT time FROM t_auth WHERE ip = ? AND  email = ? AND code = ?", realIp, jsonData.Email, jsonData.Code).Scan(&codeTime)
@@ -59,6 +64,7 @@ func SignOnHandler(c *gin.Context) {
 		})
 		return
 	}
+
 	// 注册录入
 	_, err = DB.Exec("INSERT INTO t_user (username, email, password, ip) VALUES (?,?,?,?)", strings.Split(jsonData.Email, "@")[0], jsonData.Email, modules.Sha256Hash(jsonData.Password), realIp)
 	if err != nil {
@@ -67,6 +73,10 @@ func SignOnHandler(c *gin.Context) {
 			"message": "注册信息录入失败，请联系管理员",
 		})
 		return
+	}
+
+	if err := modules.ResetDefense(realIp, "sign"); err != nil {
+		logrus.Errorln(err)
 	}
 
 	// 生成cookie

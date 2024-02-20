@@ -50,22 +50,10 @@ func SignCodeHandler(c *gin.Context) {
 		return
 	}
 
-	// 防爬
+	// 防御
 	realIp := c.Request.Header.Get("X-Real-IP")
 
-	crawler, lastTime := modules.CheckCrawler(realIp)
-	if crawler == 1 {
-		c.JSON(http.StatusConflict, gin.H{
-			"lastTime": lastTime,
-			"message":  "触发反爬虫机制，请确保您两次敏感操作间隔超过1分钟",
-		})
-		logrus.Errorln("[触发反爬机制]：", c.Request.Header.Get("X-Real-IP"))
-		return
-	} else if crawler == 2 {
-		c.JSON(http.StatusConflict, gin.H{
-			"message": "已完全触发反爬虫，拦截您的请求，请联系管理员申述解锁",
-		})
-		logrus.Errorln("[完全触发反爬机制]：", c.Request.Header.Get("X-Real-IP"))
+	if crawler := modules.CheckCrawler(c, realIp, "email"); !crawler {
 		return
 	}
 
@@ -106,7 +94,7 @@ func SignCodeHandler(c *gin.Context) {
 		"success": true,
 	})
 
-	if err := modules.ResetCrawler(c.Request.Header.Get("X-Real-IP")); err != nil {
+	if err := modules.ResetDefense(realIp, "email"); err != nil {
 		logrus.Errorln(err)
 	}
 }

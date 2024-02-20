@@ -13,21 +13,10 @@ import (
 
 // CheckBlackHandler 查询是否被挂
 func CheckBlackHandler(c *gin.Context) {
-	// 防爬
-	crawler, lastTime := modules.CheckCrawler(c.Request.Header.Get("X-Real-IP"))
-	crawler = 0
-	if crawler == 1 {
-		c.JSON(http.StatusConflict, gin.H{
-			"lastTime": lastTime,
-			"message":  "触发反爬虫机制，请确保您两次敏感操作间隔超过5分钟",
-		})
-		logrus.Errorln("[触发反爬机制]：", c.Request.Header.Get("X-Real-IP"))
-		return
-	} else if crawler == 2 {
-		c.JSON(http.StatusConflict, gin.H{
-			"message": "已完全触发反爬虫，拦截您的请求，请联系管理员申述解锁",
-		})
-		logrus.Errorln("[完全触发反爬机制]：", c.Request.Header.Get("X-Real-IP"))
+	// 防御
+	realIp := c.Request.Header.Get("X-Real-IP")
+
+	if crawler := modules.CheckCrawler(c, realIp, "search"); !crawler {
 		return
 	}
 
@@ -47,7 +36,7 @@ func CheckBlackHandler(c *gin.Context) {
 				"black":    false,
 				"lastTime": time.Now(),
 			})
-			if err := modules.ResetCrawler(c.Request.Header.Get("X-Real-IP")); err != nil {
+			if err := modules.ResetDefense(realIp, "search"); err != nil {
 				logrus.Errorln(err)
 			}
 			return
@@ -67,7 +56,7 @@ func CheckBlackHandler(c *gin.Context) {
 		"date":        black.Date.Format("2006-01-02"),
 		"lastTime":    time.Now(),
 	})
-	if err := modules.ResetCrawler(c.Request.Header.Get("X-Real-IP")); err != nil {
+	if err := modules.ResetDefense(realIp, "search"); err != nil {
 		logrus.Errorln(err)
 	}
 }
