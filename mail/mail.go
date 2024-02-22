@@ -7,7 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/gomail.v2"
 	"html/template"
-	"log"
 	"verivista/pt/config"
 )
 
@@ -50,7 +49,7 @@ func SendAuthMail(addr string, username string, code int) error {
 	m.SetBody("text/html", buf.String())
 
 	if err := ClientMail.DialAndSend(m); err != nil {
-		logrus.Infoln("邮件发送失败: ", err)
+		logrus.Errorln("邮件发送失败: ", err)
 	} else {
 		logrus.Infoln("邮件发送成功")
 	}
@@ -83,9 +82,9 @@ func SendWarnMail(addr string) error {
 	m.SetBody("text/html", buf.String())
 
 	if err := ClientMail.DialAndSend(m); err != nil {
-		log.Fatal("邮件发送失败: ", err)
+		logrus.Errorln("邮件发送失败: ", err)
 	} else {
-		log.Fatal("邮件发送成功")
+		logrus.Infoln("邮件发送成功")
 	}
 	return nil
 }
