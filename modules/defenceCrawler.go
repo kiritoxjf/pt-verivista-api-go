@@ -118,13 +118,13 @@ func GetDefense(c *gin.Context) {
 
 		switch row.Type {
 		case "sign":
-			operation.Sign = int(row.LastTime.Unix())
+			operation.Sign = int(row.LastTime.Unix()) * 1000
 		case "email":
-			operation.Email = int(row.LastTime.Unix())
+			operation.Email = int(row.LastTime.Unix()) * 1000
 		case "search":
-			operation.Search = int(row.LastTime.Unix())
+			operation.Search = int(row.LastTime.Unix()) * 1000
 		case "report":
-			operation.Report = int(row.LastTime.Unix())
+			operation.Report = int(row.LastTime.Unix()) * 1000
 		}
 	}
 
