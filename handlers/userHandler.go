@@ -174,6 +174,13 @@ func SignInHandler(c *gin.Context) {
 	})
 }
 
+func SignOutHandler(c *gin.Context) {
+	c.SetCookie("verivista_token", "", -1, "/", "", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "帐号已退出",
+	})
+}
+
 // AuthInfoHandler 验证Cookie获取用户信息
 func AuthInfoHandler(c *gin.Context) {
 	DB := database.DBClient
