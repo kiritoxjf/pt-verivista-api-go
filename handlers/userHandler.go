@@ -196,24 +196,3 @@ func AuthInfoHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, userInfo)
 }
-
-func UserHandler(c *gin.Context) {
-	//DB := database.DBClient
-	//type User struct {
-	//	Name      string `json:"name"`
-	//	Nick      string `json:"nick"`
-	//	Avatar    string `json:"avatar"`
-	//	Signature string `json:"signature"`
-	//}
-	//var user User
-	//name := c.Query("name")
-	//// 获取用户信息
-	//err := DB.QueryRow("SELECT name, nick, avatar,signature from t_user where name = ?", name).Scan(&user.Name, &user.Nick, &user.Avatar, &user.Signature)
-	//if err != nil {
-	//	c.JSON(http.StatusInternalServerError, interfaces.ErrorResponse{
-	//		Message: "ERROR GET USER",
-	//	})
-	//	return
-	//}
-	//c.JSON(http.StatusOK, user)
-}
