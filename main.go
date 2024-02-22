@@ -43,7 +43,7 @@ func main() {
 	commonGroup := r.Group("/api/com/")
 	commonGroup.POST("/record", handlers.IpRecordHandler)
 	commonGroup.GET("/icp", handlers.ICPHandler)
-	commonGroup.GET("/black", handlers.CheckBlackHandler)
+	commonGroup.GET("/search", handlers.SearchHandler)
 	commonGroup.GET("/defense", modules.GetDefense)
 	commonGroup.POST("/signCode", handlers.SignCodeHandler)
 	commonGroup.POST("/signOn", handlers.SignOnHandler)
@@ -52,7 +52,9 @@ func main() {
 	// 私密接口
 	authGroup := r.Group("/api/auth/")
 	authGroup.Use(modules.AuthMiddleware())
+	authGroup.GET("/signOut", handlers.SignOutHandler)
 	authGroup.GET("/authInfo", handlers.AuthInfoHandler)
+	authGroup.POST("/report", handlers.ReportHandler)
 
 	go func() {
 		if err := r.Run(":8081"); err != nil {

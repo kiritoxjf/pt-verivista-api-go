@@ -81,8 +81,7 @@ func SignCodeHandler(c *gin.Context) {
 	}
 
 	// 发送邮件
-	err = mail.SendAuthMail(jsonData.Email, realIp, code)
-	if err != nil {
+	if err := mail.SendAuthMail(jsonData.Email, realIp, code); err != nil {
 		logrus.Errorln("[发送验证码邮件失败]:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
