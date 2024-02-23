@@ -7,7 +7,6 @@ import (
 	"verivista/pt/database"
 	"verivista/pt/handlers"
 	"verivista/pt/logger"
-	"verivista/pt/mail"
 	"verivista/pt/modules"
 )
 
@@ -32,8 +31,6 @@ func main() {
 		return
 	}
 	logrus.Infoln("数据库初始化成功")
-
-	mail.ConnMailClient()
 
 	// 创建一个Gin路由器
 	gin.SetMode(gin.ReleaseMode)
