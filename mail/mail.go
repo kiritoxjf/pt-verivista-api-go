@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/gomail.v2"
 	"html/template"
+	"os"
 	"verivista/pt/config"
 )
 
@@ -31,12 +32,17 @@ func SendAuthMail(addr string, username string, code int) error {
 		AuthCode: code,
 	}
 
+	mailTempPath := os.Getenv("VERIVISTA_MAIL_PATH")
+	if mailTempPath == "" {
+		mailTempPath = "./mail"
+	}
+
 	m := gomail.NewMessage()
 	m.SetHeader(`From`, mailConfig.User)
 	m.SetHeader(`To`, addr)
 	m.SetHeader(`Subject`, "Verivista PT验证码")
 
-	tpl, err := template.ParseFiles(fmt.Sprintf("./mail/authTemplate.html"))
+	tpl, err := template.ParseFiles(fmt.Sprintf(mailTempPath + "/authTemplate.html"))
 	if err != nil {
 		return fmt.Errorf("[邮件模版转换失败]: %v", err)
 	}
@@ -50,6 +56,7 @@ func SendAuthMail(addr string, username string, code int) error {
 
 	if err := ClientMail.DialAndSend(m); err != nil {
 		logrus.Errorln("邮件发送失败: ", err)
+		return fmt.Errorf("[验证码邮件发送失败]： %v", err)
 	} else {
 		logrus.Infoln("邮件发送成功")
 	}
@@ -64,12 +71,17 @@ func SendWarnMail(addr string) error {
 		Email: addr,
 	}
 
+	mailTempPath := os.Getenv("VERIVISTA_MAIL_PATH")
+	if mailTempPath == "" {
+		mailTempPath = "./mail"
+	}
+
 	m := gomail.NewMessage()
 	m.SetHeader(`From`, mailConfig.User)
 	m.SetHeader(`To`, addr)
 	m.SetHeader(`Subject`, "Verivista PT提示")
 
-	tpl, err := template.ParseFiles(fmt.Sprintf("./mail/warnTemplate.html"))
+	tpl, err := template.ParseFiles(fmt.Sprintf(mailTempPath + "/warnTemplate.html"))
 	if err != nil {
 		return fmt.Errorf("[邮件模版转换失败]: %v", err)
 	}
