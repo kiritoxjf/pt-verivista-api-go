@@ -42,6 +42,7 @@ func main() {
 	commonGroup.GET("/icp", handlers.ICPHandler)
 	commonGroup.GET("/search", handlers.SearchHandler)
 	commonGroup.GET("/defense", modules.GetDefense)
+	commonGroup.GET("/statistic", handlers.GetStatistic)
 	commonGroup.POST("/signCode", handlers.SignCodeHandler)
 	commonGroup.POST("/signOn", handlers.SignOnHandler)
 	commonGroup.POST("/signIn", handlers.SignInHandler)
