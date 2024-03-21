@@ -43,7 +43,7 @@ func CheckCrawler(c *gin.Context, ip string, operation string) bool {
 
 	// 完全触发，拦截IP请求
 	if frequency >= 5 {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusLocked, gin.H{
 			"message": "已完全触发反爬虫，拦截您的请求，请联系管理员申述解锁",
 		})
 		return false
@@ -55,7 +55,7 @@ func CheckCrawler(c *gin.Context, ip string, operation string) bool {
 		if err != nil {
 			logrus.Errorln("[防御数据更新失败]:", err)
 		}
-		c.JSON(http.StatusConflict, gin.H{
+		c.JSON(http.StatusLocked, gin.H{
 			"lastTime": lastTime,
 			"message":  "触发反爬虫机制，请确保您两次敏感操作间隔超过1分钟",
 		})
@@ -79,17 +79,19 @@ func GetDefense(c *gin.Context) {
 	realIP := c.Request.Header.Get("X-Real-IP")
 
 	type Operation struct {
-		Sign   int
-		Email  int
-		Search int
-		Report int
+		Sign       int
+		Email      int
+		Search     int
+		Report     int
+		ReportList int
 	}
 
 	var operation = Operation{
-		Sign:   0,
-		Email:  0,
-		Search: 0,
-		Report: 0,
+		Sign:       0,
+		Email:      0,
+		Search:     0,
+		Report:     0,
+		ReportList: 0,
 	}
 
 	type QueryResult struct {
@@ -125,13 +127,16 @@ func GetDefense(c *gin.Context) {
 			operation.Search = int(row.LastTime.Unix()) * 1000
 		case "report":
 			operation.Report = int(row.LastTime.Unix()) * 1000
+		case "report_list":
+			operation.ReportList = int(row.LastTime.Unix()) * 1000
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"sign":   operation.Sign,
-		"email":  operation.Email,
-		"search": operation.Search,
-		"report": operation.Report,
+		"sign":       operation.Sign,
+		"email":      operation.Email,
+		"search":     operation.Search,
+		"report":     operation.Report,
+		"reportList": operation.ReportList,
 	})
 }

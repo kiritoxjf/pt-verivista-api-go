@@ -53,6 +53,7 @@ func main() {
 	authGroup.GET("/signOut", handlers.SignOutHandler)
 	authGroup.GET("/authInfo", handlers.AuthInfoHandler)
 	authGroup.POST("/report", handlers.ReportHandler)
+	authGroup.GET("/reportList", handlers.ReportListHandler)
 
 	go func() {
 		if err := r.Run(":8081"); err != nil {
